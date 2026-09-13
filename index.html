@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gas Law Practice Master</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <!-- React 18 & Babel Standalone -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    /* Custom scrollbar for modern sleek dark UI */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+      animation: fadeIn 0.25s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 antialiased min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // --- SVG ICONS HELPER ---
+    const Icon = ({ name, className = "w-5 h-5" }) => {
+      const icons = {
+        Sparkles: (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+        ),
+        Calculator: (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+        ),
+        CheckCircle2: (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        ),
+        XCircle: (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        ),
+        HelpCircle: (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        ),
+        ArrowRight: (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+        ),
+        RefreshCw: (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        ),
+        BookOpen: (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        ),
+        Award: (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15l-2 5l9-5l-9-5l2 5zm0 0l-8-3l8-3l8 3l-8 3zM12 3a6 6 0 100 12 6 6 0 000-12z" />
+        ),
+        Flame: (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 1-4 4-6 1.286 1.93 2 4.286 2 6 0 1.5-.5 2.5-1 3.5 2.5-1.5 3.5-4 3.5-4s2.5 3.036 2.5 5.5a7.973 7.973 0 01-2.343 5.657z" />
+        ),
+        ChevronRight: (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+        ),
+        Info: (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        ),
+        Check: (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+        ),
+        RotateCcw: (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        ),
+        Tag: (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5a1 1 0 01.707.293l7 7a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-7-7A1 1 0 013 12V7a4 4 0 014-4z" />
+        ),
+        Layers: (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+        ),
+        Zap: (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        ),
+        Thermometer: (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a3 3 0 011-2.236V5a2 2 0 114 0v5.764A3 3 0 0115 13v6a3 3 0 11-6 0z" />
+        ),
+        X: (
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+        )
+      };
+
+      return (
+        <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          {icons[name] || null}
+        </svg>
+      );
+    };
+
+    // --- GAS LAW DATA & UTILITIES ---
+    const GAS_LAWS = {
+      boyle: {
+        name: "Boyle's Law",
+        formula: "P₁V₁ = P₂V₂",
+        constant: "Temperature (T) and amount of gas (n)",
+        desc: "Pressure and volume are inversely proportional at constant temperature."
+      },
+      charles: {
+        name: "Charles's Law",
+        formula: "V₁ / T₁ = V₂ / T₂",
+        constant: "Pressure (P) and amount of gas (n)",
+        desc: "Volume and absolute temperature are directly proportional at constant pressure."
+      },
+      gay_lussac: {
+        name: "Gay-Lussac's Law",
+        formula: "P₁ / T₁ = P₂ / T₂",
+        constant: "Volume (V) and amount of gas (n)",
+        desc: "Pressure and absolute temperature are directly proportional at constant volume."
+      },
+      combined: {
+        name: "Combined Gas Law",
+        formula: "(P₁V₁) / T₁ = (P₂V₂) / T₂",
+        constant: "Amount of gas (n)",
+        desc: "Combines Boyle's, Charles's, and Gay-Lussac's laws into one relationship."
+      }
+    };
+
+    const PRESSURE_UNITS = ['atm', 'kPa', 'mmHg', 'torr'];
+    const VOLUME_UNITS = ['L', 'mL'];
+    const TEMP_UNITS = ['°C', 'K'];
+
+    // Helper for rounding to clean decimal places
+    const round = (val, decimals = 2) => {
+      return Number(Math.round(val + 'e' + decimals) + 'e-' + decimals);
+    };
+
+    // Convert temperature to Kelvin
+    const toKelvin = (val, unit) => {
+      return unit === '°C' ? val + 273.15 : val;
+    };
+
+    // Helper to swap state 1 and 2 tags (e.g. 'P1' <-> 'P2')
+    const invertVar = (v) => {
+      if (!v) return v;
+      if (v.endsWith('1')) return v.replace('1', '2');
+      if (v.endsWith('2')) return v.replace('2', '1');
+      return v;
+    };
+
+    // Fraction component to render numerators over denominators
+    const FractionExpr = ({ lhs, num, den, className = "" }) => {
+      if (!den) {
+        return (
+          <div className={`inline-flex items-center gap-2 font-mono font-bold ${className}`}>
+            {lhs && <span>{lhs} =</span>}
+            <span>{num}</span>
+          </div>
+        );
+      }
+
+      return (
+        <div className={`inline-flex items-center gap-3 font-mono font-bold ${className}`}>
+          {lhs && <span>{lhs} =</span>}
+          <div className="inline-flex flex-col items-center justify-center text-center">
+            <span className="px-2 py-1 border-b-2 border-current w-full text-center leading-none">{num}</span>
+            <span className="px-2 py-1 text-center leading-none">{den}</span>
+          </div>
+        </div>
+      );
+    };
+
+    // Component to render base law formulas as fractions
+    const GasLawFormula = ({ lawKey, className = "" }) => {
+      if (lawKey === 'boyle') {
+        return (
+          <div className={`inline-flex items-center gap-2 font-mono font-bold ${className}`}>
+            <span>P₁V₁ = P₂V₂</span>
+          </div>
+        );
+      }
+      if (lawKey === 'charles') {
+        return (
+          <div className={`inline-flex items-center gap-2 font-mono font-bold ${className}`}>
+            <div className="inline-flex flex-col items-center text-center">
+              <span className="border-b-2 border-current px-2 py-0.5 leading-none">V₁</span>
+              <span className="px-2 py-0.5 leading-none">T₁</span>
+            </div>
+            <span className="text-lg sm:text-xl font-sans font-normal">=</span>
+            <div className="inline-flex flex-col items-center text-center">
+              <span className="border-b-2 border-current px-2 py-0.5 leading-none">V₂</span>
+              <span className="px-2 py-0.5 leading-none">T₂</span>
+            </div>
+          </div>
+        );
+      }
+      if (lawKey === 'gay_lussac') {
+        return (
+          <div className={`inline-flex items-center gap-2 font-mono font-bold ${className}`}>
+            <div className="inline-flex flex-col items-center text-center">
+              <span className="border-b-2 border-current px-2 py-0.5 leading-none">P₁</span>
+              <span className="px-2 py-0.5 leading-none">T₁</span>
+            </div>
+            <span className="text-lg sm:text-xl font-sans font-normal">=</span>
+            <div className="inline-flex flex-col items-center text-center">
+              <span className="border-b-2 border-current px-2 py-0.5 leading-none">P₂</span>
+              <span className="px-2 py-0.5 leading-none">T₂</span>
+            </div>
+          </div>
+        );
+      }
+      if (lawKey === 'combined') {
+        return (
+          <div className={`inline-flex items-center gap-2 font-mono font-bold ${className}`}>
+            <div className="inline-flex flex-col items-center text-center">
+              <span className="border-b-2 border-current px-2 py-0.5 leading-none">P₁V₁</span>
+              <span className="px-2 py-0.5 leading-none">T₁</span>
+            </div>
+            <span className="text-lg sm:text-xl font-sans font-normal">=</span>
+            <div className="inline-flex flex-col items-center text-center">
+              <span className="border-b-2 border-current px-2 py-0.5 leading-none">P₂V₂</span>
+              <span className="px-2 py-0.5 leading-none">T₂</span>
+            </div>
+          </div>
+        );
+      }
+      return null;
+    };
+
+    // Helper for dynamic formula numerator/denominator parts
+    const getIsolatedFormulaParts = (targetVar, lawKey) => {
+      const parts = {
+        P1: {
+          boyle: { num: "P₂ × V₂", den: "V₁" },
+          gay_lussac: { num: "P₂ × T₁", den: "T₂" },
+          combined: { num: "P₂ × V₂ × T₁", den: "T₂ × V₁" }
+        },
+        P2: {
+          boyle: { num: "P₁ × V₁", den: "V₂" },
+          gay_lussac: { num: "P₁ × T₂", den: "T₁" },
+          combined: { num: "P₁ × V₁ × T₂", den: "T₁ × V₂" }
+        },
+        V1: {
+          boyle: { num: "P₂ × V₂", den: "P₁" },
+          charles: { num: "V₂ × T₁", den: "T₂" },
+          combined: { num: "P₂ × V₂ × T₁", den: "T₂ × P₁" }
+        },
+        V2: {
+          boyle: { num: "P₁ × V₁", den: "P₂" },
+          charles: { num: "V₁ × T₂", den: "T₁" },
+          combined: { num: "P₁ × V₁ × T₂", den: "T₁ × P₂" }
+        },
+        T1: {
+          charles: { num: "V₁ × T₂", den: "V₂" },
+          gay_lussac: { num: "P₁ × T₂", den: "P₂" },
+          combined: { num: "P₁ × V₁ × T₂", den: "P₂ × V₂" }
+        },
+        T2: {
+          charles: { num: "V₂ × T₁", den: "V₁" },
+          gay_lussac: { num: "P₂ × T₁", den: "P₁" },
+          combined: { num: "P₂ × V₂ × T₁", den: "P₁ × V₁" }
+        }
+      };
+      return parts[targetVar]?.[lawKey] || { num: "", den: "" };
+    };
+
+    // Random helpers
+    const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const randomChoice = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+    const generateProblem = () => {
+      const keys = ['boyle', 'charles', 'gay_lussac', 'combined'];
+      const lawKey = randomChoice(keys);
+
+      const pUnit = randomChoice(PRESSURE_UNITS);
+      const vUnit = randomChoice(VOLUME_UNITS);
+      const tUnit = randomChoice(['°C', 'K']);
+      
+      let p1, v1, t1, p2, v2, t2;
+      let target = '';
+      
+      // Base raw values (using physically reasonable ranges)
+      p1 = round(randomInt(80, 300) / 100, 2);
+      if (pUnit === 'kPa') p1 = round(p1 * 101.325, 1);
+      if (pUnit === 'mmHg' || pUnit === 'torr') p1 = round(p1 * 760, 0);
+
+      v1 = round(randomInt(100, 800) / 100, 2);
+      if (vUnit === 'mL') v1 = round(v1 * 1000, 0);
+
+      const t1C = randomInt(10, 100);
+      t1 = tUnit === '°C' ? t1C : t1C + 273.15;
+
+      // Decide target variable based on law
+      if (lawKey === 'boyle') {
+        target = randomChoice(['P2', 'V2']);
+        if (target === 'V2') {
+          p2 = round(p1 * randomChoice([0.5, 0.8, 1.2, 1.5, 2.0]), 2);
+          v2 = (p1 * v1) / p2;
+        } else {
+          v2 = round(v1 * randomChoice([0.5, 0.8, 1.2, 1.5, 2.0]), 2);
+          p2 = (p1 * v1) / v2;
+        }
+      } else if (lawKey === 'charles') {
+        target = randomChoice(['V2', 'T2']);
+        const t1K = toKelvin(t1, tUnit);
+        if (target === 'V2') {
+          const t2K = t1K * randomChoice([0.7, 0.9, 1.1, 1.3, 1.5]);
+          t2 = tUnit === '°C' ? round(t2K - 273.15, 1) : round(t2K, 1);
+          v2 = (v1 * t2K) / t1K;
+        } else {
+          v2 = round(v1 * randomChoice([0.6, 0.8, 1.2, 1.4]), 2);
+          const t2K = (v2 * t1K) / v1;
+          t2 = tUnit === '°C' ? round(t2K - 273.15, 1) : round(t2K, 1);
+        }
+      } else if (lawKey === 'gay_lussac') {
+        target = randomChoice(['P2', 'T2']);
+        const t1K = toKelvin(t1, tUnit);
+        if (target === 'P2') {
+          const t2K = t1K * randomChoice([0.7, 0.9, 1.1, 1.3, 1.5]);
+          t2 = tUnit === '°C' ? round(t2K - 273.15, 1) : round(t2K, 1);
+          p2 = (p1 * t2K) / t1K;
+        } else {
+          p2 = round(p1 * randomChoice([0.6, 0.8, 1.2, 1.4]), 2);
+          const t2K = (p2 * t1K) / p1;
+          t2 = tUnit === '°C' ? round(t2K - 273.15, 1) : round(t2K, 1);
+        }
+      } else if (lawKey === 'combined') {
+        target = randomChoice(['P2', 'V2', 'T2']);
+        const t1K = toKelvin(t1, tUnit);
+        const t2K = t1K * randomChoice([0.8, 1.2]);
+        t2 = tUnit === '°C' ? round(t2K - 273.15, 1) : round(t2K, 1);
+
+        if (target === 'P2') {
+          v2 = round(v1 * randomChoice([0.7, 1.3]), 2);
+          p2 = (p1 * v1 * t2K) / (t1K * v2);
+        } else if (target === 'V2') {
+          p2 = round(p1 * randomChoice([0.7, 1.3]), 2);
+          v2 = (p1 * v1 * t2K) / (t1K * p2);
+        } else {
+          p2 = round(p1 * randomChoice([0.8, 1.2]), 2);
+          v2 = round(v1 * randomChoice([0.8, 1.2]), 2);
+          const calcT2K = (p2 * v2 * t1K) / (p1 * v1);
+          t2 = tUnit === '°C' ? round(calcT2K - 273.15, 1) : round(calcT2K, 1);
+        }
+      }
+
+      // Calculate clean expected answer
+      let expectedAnswer = 0;
+      let targetUnit = '';
+
+      if (target === 'P2') {
+        expectedAnswer = round(p2, 2);
+        targetUnit = pUnit;
+      } else if (target === 'V2') {
+        expectedAnswer = round(v2, 2);
+        targetUnit = vUnit;
+      } else if (target === 'T2') {
+        expectedAnswer = round(t2, 1);
+        targetUnit = tUnit;
+      }
+
+      // Build givens array with extracted raw numbers
+      const givens = [];
+      if (lawKey !== 'charles') givens.push({ id: 'p1', label: `${p1} ${pUnit}`, correctVar: 'P1', unit: pUnit });
+      if (lawKey !== 'gay_lussac') givens.push({ id: 'v1', label: `${v1} ${vUnit}`, correctVar: 'V1', unit: vUnit });
+      if (lawKey !== 'boyle') givens.push({ id: 't1', label: `${t1} ${tUnit}`, correctVar: 'T1', isTemp: true, tempVal: t1, unit: tUnit });
+
+      if (lawKey !== 'charles' && target !== 'P2') givens.push({ id: 'p2', label: `${round(p2, 2)} ${pUnit}`, correctVar: 'P2', unit: pUnit });
+      if (lawKey !== 'gay_lussac' && target !== 'V2') givens.push({ id: 'v2', label: `${round(v2, 2)} ${vUnit}`, correctVar: 'V2', unit: vUnit });
+      if (lawKey !== 'boyle' && target !== 'T2') givens.push({ id: 't2', label: `${t2} ${tUnit}`, correctVar: 'T2', isTemp: true, tempVal: t2, unit: tUnit });
+
+      // Shuffle givens so they don't appear in order
+      const shuffledGivens = [...givens].sort(() => Math.random() - 0.5);
+
+      // Narrative descriptions
+      const narratives = {
+        boyle: [
+          `A flexible container holds a gas with a volume of ${v1} ${vUnit} at a pressure of ${p1} ${pUnit}. If the container is ${target === 'V2' ? `compressed/expanded until the pressure reaches ${round(p2,2)} ${pUnit}` : `compressed to a volume of ${round(v2,2)} ${vUnit}`} at constant temperature, what is the new ${target === 'V2' ? 'volume' : 'pressure'}?`,
+          `A scuba diver's air tank has a volume of ${v1} ${vUnit} at ${p1} ${pUnit}. If temperature remains constant, what will the ${target === 'V2' ? `new volume be when pressure changes to ${round(p2,2)} ${pUnit}` : `pressure be if the air expands to ${round(v2,2)} ${vUnit}`}?`
+        ],
+        charles: [
+          `A balloon filled with gas has a volume of ${v1} ${vUnit} at a temperature of ${t1} ${tUnit}. If the balloon is heated or cooled at constant pressure to ${target === 'V2' ? `${t2} ${tUnit}` : `a volume of ${round(v2,2)} ${vUnit}`}, what is the resulting ${target === 'V2' ? 'volume' : 'temperature'}?`,
+          `A sample of nitrogen gas occupies ${v1} ${vUnit} at ${t1} ${tUnit}. Assuming pressure stays constant, calculate the ${target === 'V2' ? `volume at ${t2} ${tUnit}` : `temperature (in ${tUnit}) when volume becomes ${round(v2,2)} ${vUnit}`}.`
+        ],
+        gay_lussac: [
+          `A rigid steel container stores gas at a pressure of ${p1} ${pUnit} and a temperature of ${t1} ${tUnit}. If the tank is ${target === 'P2' ? `heated/cooled to ${t2} ${tUnit}` : `pressurized to ${round(p2,2)} ${pUnit}`}, what is the final ${target === 'P2' ? 'pressure' : `temperature (in ${tUnit})`}?`,
+          `An aerosol can has an internal pressure of ${p1} ${pUnit} at ${t1} ${tUnit}. What will the ${target === 'P2' ? `pressure be if temperature changes to ${t2} ${tUnit}` : `temperature be (in ${tUnit}) if pressure reaches ${round(p2,2)} ${pUnit}`}?`
+        ],
+        combined: [
+          `A weather balloon is released at sea level where it has a volume of ${v1} ${vUnit}, pressure of ${p1} ${pUnit}, and temperature of ${t1} ${tUnit}. As it rises, ${
+            target === 'P2' 
+              ? `its volume changes to ${round(v2,2)} ${vUnit} and temperature becomes ${t2} ${tUnit}. What is the new pressure?` 
+              : target === 'V2' 
+              ? `pressure becomes ${round(p2,2)} ${pUnit} and temperature becomes ${t2} ${tUnit}. What is the new volume?` 
+              : `pressure becomes ${round(p2,2)} ${pUnit} and volume becomes ${round(v2,2)} ${vUnit}. What is the new temperature in ${tUnit}?`
+          }`,
+          `A sample of gas in a piston starts at ${p1} ${pUnit}, ${v1} ${vUnit}, and ${t1} ${tUnit}. The system is modified to ${
+            target === 'P2'
+              ? `${round(v2,2)} ${vUnit} and ${t2} ${tUnit}. Find the new pressure.`
+              : target === 'V2'
+              ? `${round(p2,2)} ${pUnit} and ${t2} ${tUnit}. Find final volume.`
+              : `${round(p2,2)} ${pUnit} and ${round(v2,2)} ${vUnit}. Find final temperature in ${tUnit}.`
+          }`
+        ]
+      };
+
+      const text = randomChoice(narratives[lawKey]);
+
+      return {
+        id: Date.now(),
+        lawKey,
+        text,
+        p1: lawKey === 'charles' ? null : p1,
+        v1: lawKey === 'gay_lussac' ? null : v1,
+        t1: lawKey === 'boyle' ? null : t1,
+        p2: lawKey === 'charles' ? null : (target === 'P2' ? '?' : round(p2, 2)),
+        v2: lawKey === 'gay_lussac' ? null : (target === 'V2' ? '?' : round(v2, 2)),
+        t2: lawKey === 'boyle' ? null : (target === 'T2' ? '?' : t2),
+        pUnit,
+        vUnit,
+        tUnit,
+        target,
+        expectedAnswer,
+        targetUnit,
+        givens: shuffledGivens,
+        rawValues: { p1, v1, t1, p2: round(p2,2), v2: round(v2,2), t2 }
+      };
+    };
+
+    function App() {
+      const [appMode, setAppMode] = useState('problem'); // Default set to 'problem' (Direct Mode)
+      const [problem, setProblem] = useState(null);
+      const [currentStep, setCurrentStep] = useState(1);
+      const [autoRedirectMessage, setAutoRedirectMessage] = useState(false);
+      
+      // Step 1 State: Variable mapping & Kelvin conversions
+      const [userAssignments, setUserAssignments] = useState({}); 
+      const [userTargetVar, setUserTargetVar] = useState('');
+      const [kelvinInputs, setKelvinInputs] = useState({}); // { [givenId]: string }
+      const [step1Error, setStep1Error] = useState('');
+
+      // Step 2 State: Selected Gas Law
+      const [selectedLaw, setSelectedLaw] = useState('');
+      const [step2Error, setStep2Error] = useState('');
+
+      // Step 3 & Step 4 / Direct Mode State
+      const [step3Confirmed, setStep3Confirmed] = useState(false);
+      const [userAnswer, setUserAnswer] = useState('');
+      const [step4Result, setStep4Result] = useState(null);
+
+      // Gamification & Stats
+      const [score, setScore] = useState(0);
+      const [streak, setStreak] = useState(0);
+      const [completedCount, setCompletedCount] = useState(0);
+      const [showReference, setShowReference] = useState(false);
+      const [showCalculator, setShowCalculator] = useState(false);
+
+      // Scratchpad calculator state
+      const [calcC, setCalcC] = useState('');
+      const [calcK, setCalcK] = useState('');
+
+      useEffect(() => {
+        loadNewProblem();
+      }, []);
+
+      const loadNewProblem = () => {
+        const newProb = generateProblem();
+        setProblem(newProb);
+        setCurrentStep(1);
+        setUserAssignments({});
+        setUserTargetVar('');
+        setKelvinInputs({});
+        setStep1Error('');
+        setSelectedLaw('');
+        setStep2Error('');
+        setStep3Confirmed(false);
+        setUserAnswer('');
+        setStep4Result(null);
+        setAutoRedirectMessage(false);
+      };
+
+      if (!problem) return null;
+
+      // STEP 1 VALIDATION
+      const handleVerifyStep1 = () => {
+        setStep1Error('');
+
+        // 1. Check all given numbers have been assigned a variable tag
+        for (const item of problem.givens) {
+          if (!userAssignments[item.id]) {
+            setStep1Error(`Please select a variable tag (P₁, V₁, T₁, P₂, V₂, T₂) for the measurement "${item.label}".`);
+            return;
+          }
+        }
+
+        // 2. Check if unknown target variable is selected
+        if (!userTargetVar) {
+          setStep1Error(`Please select the unknown target variable you are solving for.`);
+          return;
+        }
+
+        // 3. Ensure no duplicate tags were assigned
+        const selectedVars = [...problem.givens.map(g => userAssignments[g.id]), userTargetVar];
+        const uniqueVars = new Set(selectedVars);
+        if (uniqueVars.size !== selectedVars.length) {
+          setStep1Error(`Each variable tag (P₁, V₁, T₁, etc.) can only be assigned once.`);
+          return;
+        }
+
+        // 4. Verify temperature Kelvin conversions if in Celsius
+        for (const item of problem.givens) {
+          if (item.isTemp && item.unit === '°C') {
+            const expectedK = round(toKelvin(item.tempVal, item.unit), 1);
+            const userK = parseFloat(kelvinInputs[item.id]);
+            if (isNaN(userK) || Math.abs(userK - expectedK) > 0.5) {
+              setStep1Error(`Check your Kelvin temperature conversion for ${item.label}! Remember: K = °C + 273.15 (Expected ~${expectedK} K).`);
+              return;
+            }
+          }
+        }
+
+        // 5. Verify consistent state groupings (allows standard 1->initial/2->final OR inverted 2->initial/1->final)
+        let isStandard = true;
+        let isInverted = true;
+
+        for (const item of problem.givens) {
+          const assigned = userAssignments[item.id];
+          if (assigned !== item.correctVar) {
+            isStandard = false;
+          }
+          if (assigned !== invertVar(item.correctVar)) {
+            isInverted = false;
+          }
+        }
+
+        if (userTargetVar !== problem.target) {
+          isStandard = false;
+        }
+        if (userTargetVar !== invertVar(problem.target)) {
+          isInverted = false;
+        }
+
+        if (!isStandard && !isInverted) {
+          setStep1Error(
+            `Variable groupings must be consistent! Either call all initial conditions State 1 and final conditions State 2, or call all initial conditions State 2 and final conditions State 1.`
+          );
+          return;
+        }
+
+        setCurrentStep(2);
+      };
+
+      // STEP 2 VALIDATION
+      const handleVerifyStep2 = () => {
+        setStep2Error('');
+        if (selectedLaw !== problem.lawKey) {
+          setStep2Error(`Not quite right! Look at which variable remains constant or is not mentioned in the problem.`);
+          return;
+        }
+        setCurrentStep(3);
+      };
+
+      // STEP 3 ADVANCE
+      const handleConfirmStep3 = () => {
+        setStep3Confirmed(true);
+        setCurrentStep(4);
+      };
+
+      // STEP 4 / DIRECT MODE ANSWER VALIDATION
+      const handleVerifyAnswer = () => {
+        const numericAns = parseFloat(userAnswer);
+        if (isNaN(numericAns)) {
+          setStep4Result({ correct: false, msg: 'Please enter a valid numeric value.' });
+          return;
+        }
+
+        const expected = problem.expectedAnswer;
+        const tolerance = Math.abs(expected * 0.025);
+        const isCorrect = Math.abs(numericAns - expected) <= Math.max(tolerance, 0.1);
+
+        if (isCorrect) {
+          setStep4Result({
+            correct: true,
+            msg: `🎉 Excellent work! Your answer (${numericAns} ${problem.targetUnit}) is correct!`
+          });
+          setScore(prev => prev + (appMode === 'problem' ? 150 : 100) + streak * 10);
+          setStreak(prev => prev + 1);
+          setCompletedCount(prev => prev + 1);
+        } else {
+          setStreak(0);
+          
+          if (appMode === 'problem') {
+            // Automatically switch to Support Mode on incorrect answer
+            setAppMode('support');
+            setCurrentStep(1);
+            setAutoRedirectMessage(true);
+            setStep4Result(null);
+          } else {
+            setStep4Result({
+              correct: false,
+              msg: `Incorrect calculation. Expected value is approximately ${expected} ${problem.targetUnit}.`
+            });
+          }
+        }
+      };
+
+      const AVAILABLE_VARS = ['P1', 'V1', 'T1', 'P2', 'V2', 'T2'];
+      const activeTarget = userTargetVar || problem.target;
+
+      // Helper to look up mapped value for Step 3 calculation rendering
+      const getValForVar = (v) => {
+        if (v === activeTarget) return '?';
+        const item = problem.givens.find(g => userAssignments[g.id] === v);
+        if (!item) return '';
+        if (item.isTemp) {
+          const kVal = kelvinInputs[item.id] ? parseFloat(kelvinInputs[item.id]) : round(toKelvin(item.tempVal, item.unit), 1);
+          return `${kVal} K`;
+        }
+        return item.label;
+      };
+
+      const isolatedParts = getIsolatedFormulaParts(activeTarget, problem.lawKey);
+
+      const replaceVarsInExpr = (expr) => {
+        if (!expr) return "";
+        return expr
+          .replace(/P₁/g, getValForVar('P1'))
+          .replace(/V₁/g, getValForVar('V1'))
+          .replace(/T₁/g, getValForVar('T1'))
+          .replace(/P₂/g, getValForVar('P2'))
+          .replace(/V₂/g, getValForVar('V2'))
+          .replace(/T₂/g, getValForVar('T2'));
+      };
+
+      return (
+        <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
+          
+          {/* HEADER NAVBAR */}
+          <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-30 px-4 py-3 sm:px-8 flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center space-x-3">
+              <div className="bg-gradient-to-tr from-indigo-500 to-sky-400 p-2.5 rounded-xl shadow-lg shadow-indigo-500/20">
+                <Icon name="Sparkles" className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="font-bold text-lg sm:text-xl bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+                  Gas Law Practice Master
+                </h1>
+                <p className="text-xs text-slate-400">Step-by-step Chemistry Problem Solver</p>
+              </div>
+            </div>
+
+            {/* STATS & QUICK TOOLS */}
+            <div className="flex items-center space-x-3 sm:space-x-6 text-sm">
+              <div className="flex items-center space-x-2 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700">
+                <Icon name="Award" className="w-4 h-4 text-amber-400" />
+                <span className="text-slate-400 font-medium">Score:</span>
+                <span className="font-bold text-amber-400">{score}</span>
+              </div>
+
+              <div className="flex items-center space-x-2 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700">
+                <Icon name="Flame" className="w-4 h-4 text-orange-500" />
+                <span className="text-slate-400 font-medium">Streak:</span>
+                <span className="font-bold text-orange-400">{streak}</span>
+              </div>
+
+              <button
+                onClick={() => setShowReference(true)}
+                className="flex items-center space-x-1.5 bg-indigo-600/80 hover:bg-indigo-600 text-white px-3 py-1.5 rounded-lg font-medium transition text-xs sm:text-sm shadow-sm"
+              >
+                <Icon name="BookOpen" className="w-4 h-4" />
+                <span className="hidden sm:inline">Formula Sheet</span>
+              </button>
+
+              <button
+                onClick={() => setShowCalculator(!showCalculator)}
+                className="flex items-center space-x-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg font-medium border border-slate-700 transition text-xs sm:text-sm"
+              >
+                <Icon name="Calculator" className="w-4 h-4 text-sky-400" />
+                <span className="hidden sm:inline">Scratchpad</span>
+              </button>
+            </div>
+          </header>
+
+          {}
+          {/* MAIN CONTAINER */}
+          <main className="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col gap-6">
+            
+            {/* NEW PROBLEM ACTION BAR */}
+            <div className="flex items-center justify-between bg-slate-800/50 border border-slate-800 rounded-2xl p-4">
+              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Gas Law Practice</span>
+              <button
+                onClick={loadNewProblem}
+                className="flex items-center justify-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl font-medium transition shadow-lg shadow-emerald-600/20 text-sm"
+              >
+                <Icon name="RefreshCw" className="w-4 h-4" />
+                <span>Generate New Problem</span>
+              </button>
+            </div>
+
+            {/* PRACTICE MODE TOGGLE BAR */}
+            <div className="flex items-center justify-center">
+              <div className="bg-slate-950 p-1.5 rounded-2xl border border-slate-800 flex items-center gap-2 shadow-inner">
+                <button
+                  onClick={() => {
+                    setAppMode('problem');
+                    setStep4Result(null);
+                    setAutoRedirectMessage(false);
+                  }}
+                  className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs sm:text-sm font-bold transition ${
+                    appMode === 'problem'
+                      ? 'bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-lg shadow-indigo-500/20'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <Icon name="Zap" className="w-4 h-4" />
+                  <span>Problem Mode (Direct Answer)</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setAppMode('support');
+                    setStep4Result(null);
+                  }}
+                  className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs sm:text-sm font-bold transition ${
+                    appMode === 'support'
+                      ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/20'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <Icon name="Layers" className="w-4 h-4" />
+                  <span>Support Mode (Guided Steps)</span>
+                </button>
+              </div>
+            </div>
+
+            {/* WORK PROBLEM CARD */}
+            <div className="bg-gradient-to-br from-slate-800/90 to-slate-900 border border-slate-700/80 rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
+              
+              <div className="flex items-center justify-between mb-4">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                  <Icon name="Info" className="w-3.5 h-3.5" /> Word Problem
+                </span>
+                <span className="text-xs text-slate-400">Problem #{completedCount + 1}</span>
+              </div>
+
+              <p className="text-lg sm:text-xl font-medium text-slate-100 leading-relaxed">
+                "{problem.text}"
+              </p>
+            </div>
+
+            {/* DIRECT PROBLEM MODE UI */}
+            {appMode === 'problem' ? (
+              <div className="bg-slate-800/60 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 animate-fadeIn">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+                    <Icon name="Zap" className="w-5 h-5 text-sky-400" /> Calculate & Solve Directly
+                  </h3>
+                  <p className="text-sm text-slate-400 mt-1">
+                    Solve the word problem on your scratchpad and submit your final answer in <strong>{problem.targetUnit}</strong>.
+                  </p>
+                </div>
+
+                <div className="bg-slate-900/80 border border-slate-800 p-6 rounded-2xl space-y-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                        Enter Final Value ({problem.targetUnit}):
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="number"
+                          step="any"
+                          placeholder="e.g. 2.45"
+                          value={userAnswer}
+                          onChange={e => setUserAnswer(e.target.value)}
+                          className="w-56 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-xl font-mono font-bold text-indigo-300 focus:outline-none focus:border-indigo-500"
+                        />
+                        <span className="font-bold text-slate-200 text-lg">{problem.targetUnit}</span>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={handleVerifyAnswer}
+                      className="w-full sm:w-auto px-6 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-600/20 transition flex items-center justify-center space-x-2 text-base"
+                    >
+                      <Icon name="CheckCircle2" className="w-5 h-5" />
+                      <span>Submit Answer</span>
+                    </button>
+                  </div>
+
+                  {/* RESULT FEEDBACK */}
+                  {step4Result && (
+                    <div className={`p-5 rounded-xl border flex items-start gap-4 transition ${
+                      step4Result.correct 
+                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-200' 
+                        : 'bg-rose-500/10 border-rose-500/30 text-rose-200'
+                    }`}>
+                      {step4Result.correct ? (
+                        <Icon name="CheckCircle2" className="w-6 h-6 text-emerald-400 shrink-0 mt-0.5" />
+                      ) : (
+                        <Icon name="XCircle" className="w-6 h-6 text-rose-400 shrink-0 mt-0.5" />
+                      )}
+                      <div className="space-y-1">
+                        <h4 className="font-bold text-base">{step4Result.correct ? "Correct!" : "Keep Trying!"}</h4>
+                        <p className="text-sm leading-relaxed">{step4Result.msg}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* NEXT PROBLEM OR SWITCH TO STEP-BY-STEP */}
+                <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
+                  <button
+                    onClick={() => setAppMode('support')}
+                    className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold underline underline-offset-4"
+                  >
+                    Need help? Switch to Guided Support mode to see step-by-step hints
+                  </button>
+
+                  {step4Result && (
+                    <button
+                      onClick={loadNewProblem}
+                      className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/25 transition flex items-center space-x-2"
+                    >
+                      <span>Try Next Problem</span>
+                      <Icon name="ChevronRight" className="w-5 h-5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              /* GUIDED SUPPORT MODE UI */
+              <>
+                {/* AUTO REDIRECT ALERT BANNER */}
+                {autoRedirectMessage && (
+                  <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex items-start gap-3.5 text-amber-200 animate-fadeIn">
+                    <Icon name="HelpCircle" className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                    <div className="space-y-1 text-xs sm:text-sm">
+                      <h4 className="font-bold text-amber-300">Switched to Support Mode</h4>
+                      <p>
+                        Let's break down this problem together! Complete the guided steps below to set up and solve the equation step-by-step.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* STEP PROGRESS INDICATOR */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
+                  {[
+                    { step: 1, title: 'Map Variables', desc: 'Identify givens & target' },
+                    { step: 2, title: 'Identify Law', desc: 'Select gas law formula' },
+                    { step: 3, title: 'Rearrange', desc: 'Isolate unknown variable' },
+                    { step: 4, title: 'Calculate', desc: 'Plug in & solve' }
+                  ].map(s => {
+                    const isActive = currentStep === s.step;
+                    const isDone = currentStep > s.step;
+                    return (
+                      <div
+                        key={s.step}
+                        className={`p-3 sm:p-4 rounded-2xl border transition flex items-center space-x-3 ${
+                          isActive
+                            ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-lg shadow-indigo-500/10'
+                            : isDone
+                            ? 'bg-slate-800/80 border-emerald-500/50 text-slate-300'
+                            : 'bg-slate-800/30 border-slate-800 text-slate-500'
+                        }`}
+                      >
+                        <div
+                          className={`w-8 h-8 rounded-xl font-bold flex items-center justify-center text-sm shrink-0 ${
+                            isActive
+                              ? 'bg-indigo-600 text-white'
+                              : isDone
+                              ? 'bg-emerald-500 text-slate-950'
+                              : 'bg-slate-700 text-slate-400'
+                          }`}
+                        >
+                          {isDone ? <Icon name="Check" className="w-4 h-4 stroke-[3]" /> : s.step}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-bold text-xs sm:text-sm truncate">{s.title}</p>
+                          <p className="text-[10px] sm:text-xs text-slate-400 truncate">{s.desc}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* STEP 1: MAP VARIABLES & KELVIN CONVERSIONS */}
+                {currentStep === 1 && (
+                  <div className="bg-slate-800/60 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 animate-fadeIn">
+                    <div>
+                      <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+                        <Icon name="Tag" className="w-5 h-5 text-indigo-400" /> Step 1: Identify Given Values & Target
+                      </h3>
+                      <p className="text-sm text-slate-400 mt-1">
+                        Assign each number in the word problem to its proper variable tag (P₁, V₁, T₁, etc.), convert any °C to Kelvin (K), and select the unknown variable.
+                      </p>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                        1. Assign Given Quantities
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {problem.givens.map(item => (
+                          <div key={item.id} className="bg-slate-900/80 border border-slate-700/80 rounded-2xl p-4 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <span className="font-mono font-bold text-lg text-indigo-300">{item.label}</span>
+                              <select
+                                value={userAssignments[item.id] || ''}
+                                onChange={e => {
+                                  setUserAssignments({ ...userAssignments, [item.id]: e.target.value });
+                                }}
+                                className="bg-slate-800 border border-slate-600 text-slate-200 font-mono font-bold px-3 py-1.5 rounded-xl focus:outline-none focus:border-indigo-500 text-sm"
+                              >
+                                <option value="">Select Var</option>
+                                {AVAILABLE_VARS.map(v => (
+                                  <option key={v} value={v}>
+                                    {v.replace('1', '₁').replace('2', '₂')}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            {/* Celsius to Kelvin prompt */}
+                            {item.isTemp && item.unit === '°C' && (
+                              <div className="pt-2 border-t border-slate-800 space-y-1.5">
+                                <label className="block text-xs text-amber-300 font-medium flex items-center gap-1">
+                                  <Icon name="Thermometer" className="w-3.5 h-3.5" /> Convert {item.label} to Kelvin (K):
+                                </label>
+                                <div className="flex items-center space-x-2">
+                                  <input
+                                    type="number"
+                                    step="any"
+                                    placeholder="e.g. 298.15"
+                                    value={kelvinInputs[item.id] || ''}
+                                    onChange={e => setKelvinInputs({ ...kelvinInputs, [item.id]: e.target.value })}
+                                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-sm font-mono text-slate-200 focus:outline-none focus:border-amber-500"
+                                  />
+                                  <span className="text-xs font-bold text-slate-400">K</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-3 pt-2">
+                      <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                        2. Select Unknown Target Variable
+                      </h4>
+                      <div className="flex flex-wrap gap-3">
+                        {['P2', 'V2', 'T2', 'P1', 'V1', 'T1'].map(v => (
+                          <button
+                            key={v}
+                            onClick={() => setUserTargetVar(v)}
+                            className={`px-4 py-2.5 rounded-xl font-mono font-bold text-sm transition border ${
+                              userTargetVar === v
+                                ? 'bg-indigo-600 border-indigo-400 text-white shadow-lg shadow-indigo-600/30'
+                                : 'bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800'
+                            }`}
+                          >
+                            Solve for {v.replace('1', '₁').replace('2', '₂')}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {step1Error && (
+                      <div className="bg-rose-500/10 border border-rose-500/30 text-rose-300 p-4 rounded-xl text-sm flex items-start gap-3">
+                        <Icon name="XCircle" className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
+                        <span>{step1Error}</span>
+                      </div>
+                    )}
+
+                    <div className="flex justify-end pt-4">
+                      <button
+                        onClick={handleVerifyStep1}
+                        className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/25 transition flex items-center space-x-2"
+                      >
+                        <span>Check Assignments & Continue</span>
+                        <Icon name="ArrowRight" className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* STEP 2: SELECT GAS LAW */}
+                {currentStep === 2 && (
+                  <div className="bg-slate-800/60 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 animate-fadeIn">
+                    <div>
+                      <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+                        <Icon name="BookOpen" className="w-5 h-5 text-indigo-400" /> Step 2: Choose the Correct Gas Law
+                      </h3>
+                      <p className="text-sm text-slate-400 mt-1">
+                        Which gas law relationship connects the variables in this problem?
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {Object.entries(GAS_LAWS).map(([key, law]) => (
+                        <div
+                          key={key}
+                          onClick={() => setSelectedLaw(key)}
+                          className={`p-5 rounded-2xl border cursor-pointer transition flex flex-col justify-between space-y-3 ${
+                            selectedLaw === key
+                              ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-lg shadow-indigo-500/10'
+                              : 'bg-slate-900/80 border-slate-800 text-slate-300 hover:border-slate-700'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-bold text-base text-slate-100">{law.name}</h4>
+                            <div className="bg-slate-800 px-3 py-1 rounded-lg border border-slate-700">
+                              <GasLawFormula lawKey={key} className="text-indigo-300 text-sm" />
+                            </div>
+                          </div>
+                          <p className="text-xs text-slate-400 leading-relaxed">{law.desc}</p>
+                          <div className="text-[11px] text-slate-500 italic">
+                            Constant: {law.constant}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {step2Error && (
+                      <div className="bg-rose-500/10 border border-rose-500/30 text-rose-300 p-4 rounded-xl text-sm flex items-start gap-3">
+                        <Icon name="XCircle" className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
+                        <span>{step2Error}</span>
+                      </div>
+                    )}
+
+                    <div className="flex justify-between items-center pt-4">
+                      <button
+                        onClick={() => setCurrentStep(1)}
+                        className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium rounded-xl text-sm transition"
+                      >
+                        Back to Step 1
+                      </button>
+                      <button
+                        onClick={handleVerifyStep2}
+                        className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/25 transition flex items-center space-x-2"
+                      >
+                        <span>Verify Gas Law</span>
+                        <Icon name="ArrowRight" className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* STEP 3: REARRANGE FORMULA & SUBSTITUTE */}
+                {currentStep === 3 && (
+                  <div className="bg-slate-800/60 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 animate-fadeIn">
+                    <div>
+                      <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+                        <Icon name="Calculator" className="w-5 h-5 text-indigo-400" /> Step 3: Rearrange Formula & Substitute
+                      </h3>
+                      <p className="text-sm text-slate-400 mt-1">
+                        Isolate the target variable <strong>{activeTarget.replace('1','₁').replace('2','₂')}</strong> and substitute the known measurements.
+                      </p>
+                    </div>
+
+                    {/* FORMULA REARRANGEMENT DISPLAY */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="bg-slate-900/80 border border-slate-800 p-6 rounded-2xl space-y-3">
+                        <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                          1. Algebraic Rearrangement
+                        </h4>
+                        <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-center text-indigo-300 text-lg">
+                          <FractionExpr 
+                            lhs={activeTarget.replace('1','₁').replace('2','₂')} 
+                            num={isolatedParts.num} 
+                            den={isolatedParts.den} 
+                          />
+                        </div>
+                      </div>
+
+                      <div className="bg-slate-900/80 border border-slate-800 p-6 rounded-2xl space-y-3">
+                        <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                          2. Value Substitution
+                        </h4>
+                        <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-center text-sky-300 text-lg overflow-x-auto">
+                          <FractionExpr 
+                            lhs={activeTarget.replace('1','₁').replace('2','₂')} 
+                            num={replaceVarsInExpr(isolatedParts.num)} 
+                            den={replaceVarsInExpr(isolatedParts.den)} 
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-center pt-4">
+                      <button
+                        onClick={() => setCurrentStep(2)}
+                        className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium rounded-xl text-sm transition"
+                      >
+                        Back to Step 2
+                      </button>
+                      <button
+                        onClick={handleConfirmStep3}
+                        className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/25 transition flex items-center space-x-2"
+                      >
+                        <span>Proceed to Final Calculation</span>
+                        <Icon name="ArrowRight" className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* STEP 4: SOLVE & VERIFY */}
+                {currentStep === 4 && (
+                  <div className="bg-slate-800/60 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 animate-fadeIn">
+                    <div>
+                      <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+                        <Icon name="CheckCircle2" className="w-5 h-5 text-emerald-400" /> Step 4: Solve & Verify Calculation
+                      </h3>
+                      <p className="text-sm text-slate-400 mt-1">
+                        Calculate the final numeric value for <strong>{activeTarget.replace('1','₁').replace('2','₂')}</strong> in <strong>{problem.targetUnit}</strong>.
+                      </p>
+                    </div>
+
+                    <div className="bg-slate-900/80 border border-slate-800 p-6 rounded-2xl space-y-4">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                            Calculated Answer ({problem.targetUnit}):
+                          </label>
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="number"
+                              step="any"
+                              placeholder="e.g. 2.45"
+                              value={userAnswer}
+                              onChange={e => setUserAnswer(e.target.value)}
+                              className="w-56 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-xl font-mono font-bold text-indigo-300 focus:outline-none focus:border-indigo-500"
+                            />
+                            <span className="font-bold text-slate-200 text-lg">{problem.targetUnit}</span>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={handleVerifyAnswer}
+                          className="w-full sm:w-auto px-6 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-600/20 transition flex items-center justify-center space-x-2 text-base"
+                        >
+                          <Icon name="CheckCircle2" className="w-5 h-5" />
+                          <span>Submit Calculation</span>
+                        </button>
+                      </div>
+
+                      {/* RESULT FEEDBACK */}
+                      {step4Result && (
+                        <div className={`p-5 rounded-xl border flex items-start gap-4 transition ${
+                          step4Result.correct 
+                            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-200' 
+                            : 'bg-rose-500/10 border-rose-500/30 text-rose-200'
+                        }`}>
+                          {step4Result.correct ? (
+                            <Icon name="CheckCircle2" className="w-6 h-6 text-emerald-400 shrink-0 mt-0.5" />
+                          ) : (
+                            <Icon name="XCircle" className="w-6 h-6 text-rose-400 shrink-0 mt-0.5" />
+                          )}
+                          <div className="space-y-1">
+                            <h4 className="font-bold text-base">{step4Result.correct ? "Correct!" : "Keep Trying!"}</h4>
+                            <p className="text-sm leading-relaxed">{step4Result.msg}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex justify-between items-center pt-2">
+                      <button
+                        onClick={() => setCurrentStep(3)}
+                        className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium rounded-xl text-sm transition"
+                      >
+                        Back to Step 3
+                      </button>
+
+                      {step4Result && step4Result.correct && (
+                        <button
+                          onClick={loadNewProblem}
+                          className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-500 hover:to-sky-400 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/25 transition flex items-center space-x-2"
+                        >
+                          <span>Try Next Problem</span>
+                          <Icon name="ChevronRight" className="w-5 h-5" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </main>
+
+          {}
+          {/* SCRATCHPAD QUICK CALCULATOR */}
+          {showCalculator && (
+            <div className="fixed bottom-6 right-6 z-40 bg-slate-900 border border-slate-700 p-5 rounded-3xl shadow-2xl w-80 space-y-4 animate-fadeIn">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div className="flex items-center space-x-2">
+                  <Icon name="Calculator" className="w-5 h-5 text-sky-400" />
+                  <h3 className="font-bold text-sm text-slate-100">Quick Scratchpad</h3>
+                </div>
+                <button 
+                  onClick={() => setShowCalculator(false)}
+                  className="text-slate-400 hover:text-slate-200 p-1 rounded-lg"
+                >
+                  <Icon name="X" className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                  Temperature Converter (°C ↔ K)
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-mono text-slate-400">°C:</span>
+                    <input
+                      type="number"
+                      placeholder="Celsius"
+                      value={calcC}
+                      onChange={e => {
+                        const val = e.target.value;
+                        setCalcC(val);
+                        if (val !== '') setCalcK((parseFloat(val) + 273.15).toFixed(2));
+                        else setCalcK('');
+                      }}
+                      className="w-36 bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-200 focus:outline-none focus:border-sky-500"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-mono text-slate-400">K:</span>
+                    <input
+                      type="number"
+                      placeholder="Kelvin"
+                      value={calcK}
+                      onChange={e => {
+                        const val = e.target.value;
+                        setCalcK(val);
+                        if (val !== '') setCalcC((parseFloat(val) - 273.15).toFixed(2));
+                        else setCalcC('');
+                      }}
+                      className="w-36 bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-200 focus:outline-none focus:border-sky-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-slate-800 text-[11px] text-slate-500 italic">
+                  Tip: Standard Pressure = 1.00 atm = 101.325 kPa = 760 mmHg = 760 torr.
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* FORMULA REFERENCE SHEET MODAL */}
+          {showReference && (
+            <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 space-y-6 shadow-2xl animate-fadeIn">
+                <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="bg-indigo-600/20 p-2 rounded-xl border border-indigo-500/30">
+                      <Icon name="BookOpen" className="w-6 h-6 text-indigo-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg text-slate-100">Gas Law Reference Sheet</h3>
+                      <p className="text-xs text-slate-400">Key formulas, constants & unit conversions</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowReference(false)}
+                    className="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-xl transition"
+                  >
+                    <Icon name="X" className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* FORMULAS GRID */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {Object.entries(GAS_LAWS).map(([key, law]) => (
+                    <div key={key} className="bg-slate-950/80 border border-slate-800 p-4 rounded-2xl space-y-2">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-bold text-sm text-indigo-300">{law.name}</h4>
+                      </div>
+                      <div className="py-2 px-3 bg-slate-900 rounded-xl border border-slate-800 text-center">
+                        <GasLawFormula lawKey={key} className="text-white text-base" />
+                      </div>
+                      <p className="text-xs text-slate-400">{law.desc}</p>
+                      <p className="text-[11px] text-slate-500 italic">Constant: {law.constant}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* CONVERSION CONSTANTS */}
+                <div className="bg-slate-950/80 border border-slate-800 p-5 rounded-2xl space-y-3">
+                  <h4 className="font-bold text-sm text-slate-200 uppercase tracking-wider">
+                    Unit Conversions & Constants
+                  </h4>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-300">
+                    <li className="flex items-center space-x-2">
+                      <span className="w-2 h-2 rounded-full bg-indigo-400"></span>
+                      <span><strong>Temperature:</strong> K = °C + 273.15</span>
+                    </li>
+                    <li className="flex items-center space-x-2">
+                      <span className="w-2 h-2 rounded-full bg-indigo-400"></span>
+                      <span><strong>Pressure:</strong> 1 atm = 101.325 kPa</span>
+                    </li>
+                    <li className="flex items-center space-x-2">
+                      <span className="w-2 h-2 rounded-full bg-indigo-400"></span>
+                      <span><strong>Pressure:</strong> 1 atm = 760 mmHg = 760 torr</span>
+                    </li>
+                    <li className="flex items-center space-x-2">
+                      <span className="w-2 h-2 rounded-full bg-indigo-400"></span>
+                      <span><strong>Volume:</strong> 1 L = 1000 mL</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <button
+                    onClick={() => setShowReference(false)}
+                    className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition text-sm shadow-lg shadow-indigo-600/20"
+                  >
+                    Close Reference Sheet
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* FOOTER */}
+          <footer className="border-t border-slate-800/80 bg-slate-950/50 py-4 px-8 text-center text-xs text-slate-500">
+            Gas Law Practice Master &bull; Interactive Chemistry Learning Tool
+          </footer>
+        </div>
+      );
+    }
+
+    const rootElement = document.getElementById('root');
+    const root = ReactDOM.createRoot(rootElement);
+    root.render(<App />);
+  </script>
+</body>
+</html>
